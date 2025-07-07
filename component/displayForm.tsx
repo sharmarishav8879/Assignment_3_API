@@ -1,110 +1,103 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, StyleSheet, Alert } from "react-native";
+import axios from "axios";
 
 type FormProps = {
-  onDateChange: (month: number, date: number) => void;
+  onDateChange?: () => void;
 };
 
 export default function DisplayForm({ onDateChange }: FormProps) {
-  const [month, setMonth] = useState<number | undefined>(undefined);
-  const [day, setDay] = useState<string>("");
+  const [month, setMonth] = useState("");
+  const [day, setDay] = useState("");
+  const [fact, setFact] = useState("");
 
-  const handleMonthChange = (value: number) => {
-    setMonth(value);
-    const chosenDay = parseInt(day, 10);
-    if (value && chosenDay >= 1 && chosenDay <= 31) {
-      onDateChange(value, chosenDay);
+  useEffect(() => {
+    if (month && day) {
+      fetchFact();
     }
-  };
+  }, [month, day]);
 
-  const handleDayChange = (text: string) => {
-    setDay(text);
-    const chosenDay = parseInt(text, 10);
-    if (month && chosenDay >= 1 && chosenDay <= 31) {
-      onDateChange(month, chosenDay);
+  const fetchFact = async () => {
+    try {
+      const response = await axios.get(
+        `https://numbersapi.p.rapidapi.com/${month}/${day}/date`,
+        {
+          headers: {
+            "X-RapidAPI-Key": "fe2e197d65mshf0e1952758929aap1b4084jsnd72dfe652000", // ✅ replace with yours if needed
+            "X-RapidAPI-Host": "numbersapi.p.rapidapi.com",
+          },
+          params: { json: true },
+        }
+      );
+
+      setFact(response.data.text);
+      if (onDateChange) onDateChange();
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch fact.");
     }
   };
 
   return (
-    <View style={styles.formContainer}>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={month}
-          onValueChange={handleMonthChange}
-          style={styles.picker}
-        >
-          <Picker.Item label="Select a month" value={null} />
-          <Picker.Item label="January" value={1} />
-          <Picker.Item label="February" value={2} />
-          <Picker.Item label="March" value={3} />
-          <Picker.Item label="April" value={4} />
-          <Picker.Item label="May" value={5} />
-          <Picker.Item label="June" value={6} />
-          <Picker.Item label="July" value={7} />
-          <Picker.Item label="August" value={8} />
-          <Picker.Item label="September" value={9} />
-          <Picker.Item label="October" value={10} />
-          <Picker.Item label="November" value={11} />
-          <Picker.Item label="December" value={12} />
-        </Picker>
+    <View style={styles.container}>
+      <Text style={styles.heading}>textIncomponent</Text>
 
-        <TextInput
-          style={styles.pickerInput}
-          value={month !== undefined ? month.toString() : ""}
-          editable={false} // so user can't change this directly
-          placeholder="Selected month number"
-        />
-      </View>
-
+      <Text style={styles.label}>Month (1–12)</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter a date (1-31)"
-        value={day}
-        onChangeText={handleDayChange}
         keyboardType="numeric"
-        maxLength={2}
+        placeholder="Enter month (e.g. 4)"
+        value={month}
+        onChangeText={setMonth}
       />
+
+      <Text style={styles.label}>Day (1–31)</Text>
+      <TextInput
+        style={styles.input}
+        keyboardType="numeric"
+        placeholder="Enter day (e.g. 7)"
+        value={day}
+        onChangeText={setDay}
+      />
+
+      {fact !== "" && (
+        <View style={styles.factBox}>
+          <Text style={styles.factText}>{fact}</Text>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  formContainer: {
-    alignItems: "center",
-    marginTop: 20,
+  container: {
+    paddingTop: 20,
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 5,
-    marginBottom: 10,
-    width: 200,
-    overflow: "hidden",
-  },
-  picker: {
-    height: 55,
-    width: "100%",
-  },
-  pickerInput: {
-    width: 200,
-    height: 40,
-    borderColor: "gray",
-    borderTopWidth: 1,
-    marginBottom: 10,
-    textAlign: "center",
-    color: "#555",
+  heading: {
+    fontSize: 18,
+    fontWeight: "thin",
+    marginBottom: 20,
+    textAlign: "left",
   },
   label: {
-    fontSize: 16,
-    marginBottom: 5,
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
   },
   input: {
-    width: 200,
-    height: 40,
-    borderColor: "gray",
     borderWidth: 1,
-    marginBottom: 10,
-    textAlign: "center",
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 16,
+  },
+  factBox: {
+    marginTop: 20,
+    backgroundColor: "#f0f0f0",
+    padding: 15,
+    borderRadius: 6,
+  },
+  factText: {
+    fontSize: 14,
+    color: "#333",
   },
 });
