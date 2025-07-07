@@ -23,7 +23,8 @@ export default function DisplayForm({ onDateChange }: FormProps) {
         `https://numbersapi.p.rapidapi.com/${month}/${day}/date`,
         {
           headers: {
-            "X-RapidAPI-Key": "fe2e197d65mshf0e1952758929aap1b4084jsnd72dfe652000", // ✅ replace with yours if needed
+            "X-RapidAPI-Key":
+              "fe2e197d65mshf0e1952758929aap1b4084jsnd72dfe652000", // ✅ replace with yours if needed
             "X-RapidAPI-Host": "numbersapi.p.rapidapi.com",
           },
           params: { json: true },
