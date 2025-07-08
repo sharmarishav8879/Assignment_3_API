@@ -5,7 +5,7 @@ import DisplayForm from "../component/displayForm"; // ✅ make sure folder name
 export default function App() {
   return (
     <View style={styles.container}>
-      <DisplayForm />
+      <DisplayForm onDateChange={() => {}} />
       <StatusBar style="auto" />
     </View>
   );

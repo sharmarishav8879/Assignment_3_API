@@ -1,54 +1,92 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, StyleSheet, Alert } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 
 type FormProps = {
-  onDateChange?: () => void;
+  onDateChange: (month: number, date: number) => void;
 };
 
 export default function DisplayForm({ onDateChange }: FormProps) {
-  const [month, setMonth] = useState("");
-  const [day, setDay] = useState("");
-  const [fact, setFact] = useState("");
+  const [month, setMonth] = useState<number | undefined>(undefined);
+  const [day, setDay] = useState<string>(""); // keep as string for input
+  const [fact, setFact] = useState<string>("");
+
+  const handleMonthChange = (value: number | undefined) => {
+    setMonth(value);
+    const chosenDay = parseInt(day, 10);
+    if (value && chosenDay >= 1 && chosenDay <= 31) {
+      onDateChange(value, chosenDay);
+    }
+  };
+
+  // When day changes, also trigger onDateChange if month is set
+  const handleDayChange = (value: string) => {
+    setDay(value);
+    const chosenDay = parseInt(value, 10);
+    if (month && chosenDay >= 1 && chosenDay <= 31) {
+      onDateChange(month, chosenDay);
+    }
+  };
 
   useEffect(() => {
-    if (month && day) {
-      fetchFact();
+    // Only fetch if both valid
+    const chosenDay = parseInt(day, 10);
+    if (month && chosenDay >= 1 && chosenDay <= 31) {
+      fetchFact(month, chosenDay);
     }
   }, [month, day]);
 
-  const fetchFact = async () => {
+  const fetchFact = async (month: number, day: number) => {
     try {
       const response = await axios.get(
         `https://numbersapi.p.rapidapi.com/${month}/${day}/date`,
         {
           headers: {
-            "X-RapidAPI-Key": "fe2e197d65mshf0e1952758929aap1b4084jsnd72dfe652000", // ✅ replace with yours if needed
+            "X-RapidAPI-Key":
+              "fe2e197d65mshf0e1952758929aap1b4084jsnd72dfe652000",
             "X-RapidAPI-Host": "numbersapi.p.rapidapi.com",
           },
           params: { json: true },
         }
       );
-
       setFact(response.data.text);
-      if (onDateChange) onDateChange();
     } catch (error) {
       Alert.alert("Error", "Failed to fetch fact.");
+      setFact("");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>textIncomponent</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={month}
+          onValueChange={handleMonthChange}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select a month" value={undefined} />
+          <Picker.Item label="January" value={1} />
+          <Picker.Item label="February" value={2} />
+          <Picker.Item label="March" value={3} />
+          <Picker.Item label="April" value={4} />
+          <Picker.Item label="May" value={5} />
+          <Picker.Item label="June" value={6} />
+          <Picker.Item label="July" value={7} />
+          <Picker.Item label="August" value={8} />
+          <Picker.Item label="September" value={9} />
+          <Picker.Item label="October" value={10} />
+          <Picker.Item label="November" value={11} />
+          <Picker.Item label="December" value={12} />
+        </Picker>
 
-      <Text style={styles.label}>Month (1–12)</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        placeholder="Enter month (e.g. 4)"
-        value={month}
-        onChangeText={setMonth}
-      />
+        <TextInput
+          style={styles.pickerInput}
+          value={month !== undefined ? month.toString() : ""}
+          editable={false}
+          placeholder="Selected month number"
+        />
+      </View>
 
       <Text style={styles.label}>Day (1–31)</Text>
       <TextInput
@@ -56,7 +94,7 @@ export default function DisplayForm({ onDateChange }: FormProps) {
         keyboardType="numeric"
         placeholder="Enter day (e.g. 7)"
         value={day}
-        onChangeText={setDay}
+        onChangeText={handleDayChange}
       />
 
       {fact !== "" && (
@@ -99,5 +137,26 @@ const styles = StyleSheet.create({
   factText: {
     fontSize: 14,
     color: "#333",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 5,
+    marginBottom: 10,
+    width: 200,
+    overflow: "hidden",
+  },
+  picker: {
+    height: 55,
+    width: "100%",
+  },
+  pickerInput: {
+    width: 200,
+    height: 40,
+    borderColor: "gray",
+    borderTopWidth: 1,
+    marginBottom: 10,
+    textAlign: "center",
+    color: "#555",
   },
 });
