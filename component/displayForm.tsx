@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, StyleSheet, Alert } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
+import { Platform } from "react-native";
 
 type FormProps = {
   onDateChange: (month: number, date: number) => void;
@@ -127,6 +128,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 6,
     marginBottom: 16,
+    paddingVertical: Platform.OS === "ios" ? 12 : 8,
   },
   factBox: {
     marginTop: 20,
@@ -139,16 +141,17 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   pickerContainer: {
-    borderWidth: 1,
+    borderWidth: Platform.OS === "ios" ? 1 : 1,
     borderColor: "gray",
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: Platform.OS === "ios" ? 30 : 10, // Add space below picker on iOS
     width: 200,
     overflow: "hidden",
+    height: Platform.OS === "ios" ? 180 : 55, // Give it full space on iOS to avoid overlap
   },
   picker: {
-    height: 55,
     width: "100%",
+    height: Platform.OS === "ios" ? 180 : 55, // match the container
   },
   pickerInput: {
     width: 200,
